@@ -1,0 +1,111 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 date,item_sold,quantity,unit_price_usd,total_revenue_usd\
+2021-05-10,12oz honey jar,18,8,144\
+2021-05-10,Beeswax block,4,6,24\
+2021-05-22,12oz honey jar,7,8,56\
+2021-06-01,12oz honey jar,32,8,256\
+2021-06-01,8oz honey jar,15,6,90\
+2021-06-15,Beeswax block,2,6,12\
+2021-06-20,12oz honey jar,1,8,8\
+2021-07-04,Nuc hive,1,180,180\
+2021-07-04,12oz honey jar,40,8,320\
+2021-07-04,Beeswax block,10,6,60\
+2021-07-04,1lb honey jar,12,12,144\
+2021-07-19,12oz honey jar,6,8,48\
+2021-08-02,Beeswax block,5,6,30\
+2021-08-02,12oz honey jar,14,8,112\
+2021-08-21,12oz honey jar,3,8,24\
+2021-09-11,12oz honey jar,25,8,200\
+2021-09-11,Beeswax block,6,6,36\
+2021-09-30,Package bees,1,150,150\
+2021-10-18,Beeswax block,1,6,6\
+2021-11-05,12oz honey jar,4,8,32\
+\
+2022-04-15,12oz honey jar,20,9,180\
+2022-04-15,Beeswax block,3,6.5,19.5\
+2022-05-01,12oz honey jar,45,9,405\
+2022-05-01,1lb honey jar,20,13,260\
+2022-05-16,12oz honey jar,5,9,45\
+2022-05-30,Beeswax candle,12,7,84\
+2022-06-12,12oz honey jar,28,9,252\
+2022-06-12,Beeswax block,7,6.5,45.5\
+2022-06-27,Nuc hive,2,180,360\
+2022-07-04,12oz honey jar,60,9,540\
+2022-07-04,Beeswax candle,25,7,175\
+2022-07-04,Beeswax block,10,6.5,65\
+2022-07-19,12oz honey jar,10,9,90\
+2022-08-08,Beeswax block,4,6.5,26\
+2022-08-25,12oz honey jar,33,9,297\
+2022-08-25,1lb honey jar,15,13,195\
+2022-09-12,12oz honey jar,6,9,54\
+2022-10-02,Package bees,3,150,450\
+2022-10-20,12oz honey jar,8,9,72\
+2022-11-11,Beeswax candle,5,7,35\
+\
+2023-04-12,12oz honey jar,25,10,250\
+2023-04-12,Beeswax block,5,7,35\
+2023-04-28,12oz honey jar,6,10,60\
+2023-05-10,12oz honey jar,70,10,700\
+2023-05-10,1lb honey jar,25,14,350\
+2023-05-10,Beeswax candle,30,8,240\
+2023-05-28,Beeswax block,1,7,7\
+2023-06-08,12oz honey jar,40,10,400\
+2023-06-08,Beeswax candle,14,8,112\
+2023-06-23,12oz honey jar,4,10,40\
+2023-07-04,Established hive,1,350,350\
+2023-07-04,12oz honey jar,85,10,850\
+2023-07-04,Beeswax block,15,7,105\
+2023-07-04,1lb honey jar,30,14,420\
+2023-07-20,12oz honey jar,12,10,120\
+2023-08-03,Beeswax candle,18,8,144\
+2023-08-19,12oz honey jar,35,10,350\
+2023-09-06,12oz honey jar,7,10,70\
+2023-09-28,Nuc hive,1,180,180\
+2023-10-14,Established hive,1,350,350\
+2023-11-02,Beeswax candle,6,8,48\
+\
+2024-04-05,12oz honey jar,30,11,330\
+2024-04-05,Beeswax block,6,7.5,45\
+2024-04-20,12oz honey jar,8,11,88\
+2024-05-04,12oz honey jar,95,11,1045\
+2024-05-04,1lb honey jar,40,15,600\
+2024-05-04,Beeswax candle,35,9,315\
+2024-05-22,12oz honey jar,10,11,110\
+2024-06-06,Beeswax block,12,7.5,90\
+2024-06-18,12oz honey jar,50,11,550\
+2024-07-04,12oz honey jar,110,11,1210\
+2024-07-04,Beeswax candle,50,9,450\
+2024-07-04,1lb honey jar,45,15,675\
+2024-07-25,12oz honey jar,9,11,99\
+2024-08-10,Nuc hive,2,200,400\
+2024-08-10,Beeswax block,5,7.5,37.5\
+2024-08-26,12oz honey jar,40,11,440\
+2024-09-12,12oz honey jar,12,11,132\
+2024-10-01,Package bees,3,150,450\
+2024-10-20,Beeswax candle,8,9,72\
+\
+2025-04-10,12oz honey jar,20,12,240\
+2025-04-10,Beeswax block,3,8,24\
+2025-04-29,12oz honey jar,60,12,720\
+2025-04-29,1lb honey jar,22,16,352\
+2025-05-15,Beeswax candle,18,10,180\
+2025-05-28,12oz honey jar,8,12,96\
+2025-06-12,12oz honey jar,75,12,900\
+2025-06-12,Beeswax block,14,8,112\
+2025-06-28,Nuc hive,1,210,210\
+2025-07-04,12oz honey jar,140,12,1680\
+2025-07-04,1lb honey jar,60,16,960\
+2025-07-04,Beeswax candle,70,10,700\
+2025-07-19,12oz honey jar,12,12,144\
+2025-08-03,Beeswax block,6,8,48\
+2025-08-22,12oz honey jar,55,12,660\
+2025-09-09,12oz honey jar,7,12,84\
+2025-09-30,Beeswax candle,10,10,100\
+2025-10-18,Established hive,1,400,400\
+2025-11-05,12oz honey jar,5,12,60}
