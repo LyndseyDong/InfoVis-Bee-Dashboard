@@ -39,3 +39,7 @@ Top-right dropdown filters ALL charts and stats to a specific year, or show all 
 - `Profit.csv` — 99 sales records (honey jars, beeswax, hives)
 - `Treatments.csv` — 188 treatment records
 - `HiveEvents.rtf` — 6 key events (deaths, replacements, splits)
+
+  ### Analytics
+
+  ### 
