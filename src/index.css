@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --font-fredoka: 'Fredoka One', cursive;
+  --font-nunito: 'Nunito', sans-serif;
+
+  --color-honey-50:  #FFFBEB;
+  --color-honey-100: #FEF3C7;
+  --color-honey-200: #FDE68A;
+  --color-honey-300: #FCD34D;
+  --color-honey-400: #FBBF24;
+  --color-honey-500: #F59E0B;
+  --color-honey-600: #D97706;
+  --color-honey-700: #B45309;
+  --color-honey-800: #92400E;
+  --color-honey-900: #78350F;
+}
+
+body {
+  font-family: var(--font-nunito);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-fredoka);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #FEF3C7; }
+::-webkit-scrollbar-thumb { background: #FDE68A; border-radius: 3px; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
