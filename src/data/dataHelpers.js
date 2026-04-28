@@ -101,6 +101,76 @@ export function getCompareData(hiveIds, metric, year = 'all') {
   }));
 }
 
+// Quarter-aggregated compare data — X-axis shows "2021 Q1", "2021 Q2", etc.
+// mite/weight: averaged per quarter; harvest: summed per quarter
+function monthToQuarterKey(yyyyMM) {
+  const [y, m] = yyyyMM.split('-');
+  return `${y} Q${Math.ceil(parseInt(m, 10) / 3)}`;
+}
+
+export function getCompareDataByQuarter(hiveIds, metric, year = 'all') {
+  const getFn = metric === 'weight' ? getWeightData : metric === 'harvest' ? getHarvestData : getMiteData;
+  const useSum = metric === 'harvest';
+
+  const byHiveByQ = {};
+  hiveIds.forEach(id => {
+    const acc = {};
+    getFn(id, year).forEach(d => {
+      const q = monthToQuarterKey(d.date);
+      if (!acc[q]) acc[q] = [];
+      acc[q].push(d.value);
+    });
+    byHiveByQ[id] = Object.fromEntries(
+      Object.entries(acc).map(([q, vals]) => {
+        const agg = useSum
+          ? Math.round(vals.reduce((s, v) => s + v, 0))
+          : Math.round((vals.reduce((s, v) => s + v, 0) / vals.length) * 10) / 10;
+        return [q, agg];
+      })
+    );
+  });
+
+  const dataQuarters = [...new Set(hiveIds.flatMap(id => Object.keys(byHiveByQ[id])))].sort();
+  const allQuarters = year !== 'all'
+    ? [`${year} Q1`, `${year} Q2`, `${year} Q3`, `${year} Q4`]
+    : dataQuarters;
+  return allQuarters.map(q => ({
+    date: q,
+    ...Object.fromEntries(hiveIds.map(id => [id, byHiveByQ[id][q] ?? null])),
+  }));
+}
+
+// Year-aggregated compare data — X-axis shows "2021", "2022", etc.
+// mite/weight: averaged per year; harvest: summed per year
+export function getCompareDataByYear(hiveIds, metric, year = 'all') {
+  const getFn = metric === 'weight' ? getWeightData : metric === 'harvest' ? getHarvestData : getMiteData;
+  const useSum = metric === 'harvest';
+
+  const byHiveByYear = {};
+  hiveIds.forEach(id => {
+    const acc = {};
+    getFn(id, year).forEach(d => {
+      const y = d.date.slice(0, 4);
+      if (!acc[y]) acc[y] = [];
+      acc[y].push(d.value);
+    });
+    byHiveByYear[id] = Object.fromEntries(
+      Object.entries(acc).map(([y, vals]) => {
+        const agg = useSum
+          ? Math.round(vals.reduce((s, v) => s + v, 0))
+          : Math.round((vals.reduce((s, v) => s + v, 0) / vals.length) * 10) / 10;
+        return [y, agg];
+      })
+    );
+  });
+
+  const allYears = [...new Set(hiveIds.flatMap(id => Object.keys(byHiveByYear[id])))].sort();
+  return allYears.map(y => ({
+    date: y,
+    ...Object.fromEntries(hiveIds.map(id => [id, byHiveByYear[id][y] ?? null])),
+  }));
+}
+
 // Finance helpers
 export function getRevenueByYear() {
   const byYear = Object.fromEntries(YEARS.map(y => [y, 0]));

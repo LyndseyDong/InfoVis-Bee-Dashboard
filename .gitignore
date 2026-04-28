@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .DS_Store
+server/buzz.db
+server/buzz.db-shm
+server/buzz.db-wal
