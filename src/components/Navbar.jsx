@@ -5,8 +5,9 @@ const NAV_LINKS = [
   { to: '/',         label: '🍯 Health',   exact: true },
   { to: '/finance',  label: '💰 Finance',  exact: false },
   { to: '/compare',  label: '📊 Compare',  exact: false },
-  { to: '/calendar', label: '📅 Calendar', exact: false },
-  { to: '/upload',   label: '📤 Upload',   exact: false },
+  { to: '/calendar',  label: '📅 Calendar', exact: false },
+  { to: '/timeline',  label: '📈 Timeline', exact: false },
+  { to: '/upload',    label: '📤 Upload',   exact: false },
 ];
 
 export default function Navbar() {

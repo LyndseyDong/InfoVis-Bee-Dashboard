@@ -7,6 +7,7 @@ import FinancePage    from './pages/FinancePage';
 import UploadPage     from './pages/UploadPage';
 import ComparePage    from './pages/ComparePage';
 import CalendarPage   from './pages/CalendarPage';
+import HiveTimeline   from './pages/HiveTimeline';
 
 function ProtectedRoute({ children }) {
   const { isLoggedIn } = useApp();
@@ -36,8 +37,9 @@ function AppRoutes() {
       <Route path="/finance"  element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
       <Route path="/upload"   element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
       <Route path="/compare"  element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
-      <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-      <Route path="*"         element={<Navigate to="/" replace />} />
+      <Route path="/calendar"  element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+      <Route path="/timeline"  element={<ProtectedRoute><HiveTimeline /></ProtectedRoute>} />
+      <Route path="*"          element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
