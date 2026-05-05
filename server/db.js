@@ -54,6 +54,12 @@ function createDb() {
       category TEXT NOT NULL,
       total_cost REAL NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS vaccines (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hive_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      vaccine TEXT
+    );
   `);
 
   const count = db.prepare('SELECT COUNT(*) as c FROM mite_count').get();
@@ -75,6 +81,7 @@ function seedData(db, raw) {
     treatment: db.prepare('INSERT INTO treatments (hive_id, date, treatment) VALUES (?, ?, ?)'),
     profit: db.prepare('INSERT INTO profit (date, item_sold, total_revenue) VALUES (?, ?, ?)'),
     expense: db.prepare('INSERT INTO expenses (date, category, total_cost) VALUES (?, ?, ?)'),
+    vaccine: db.prepare('INSERT INTO vaccines (hive_id, date, vaccine) VALUES (?, ?, ?)'),
   };
 
   db.transaction(() => {
@@ -85,6 +92,7 @@ function seedData(db, raw) {
     raw.treatments.forEach(r => ins.treatment.run(r.hiveId, r.date, r.treatment || null));
     raw.profit.forEach(r => ins.profit.run(r.date, r.itemSold, r.totalRevenue));
     raw.expenses.forEach(r => ins.expense.run(r.date, r.category, r.totalCost));
+    (raw.vaccines || []).forEach(r => ins.vaccine.run(r.hiveId, r.date, r.vaccine || null));
   })();
 }
 

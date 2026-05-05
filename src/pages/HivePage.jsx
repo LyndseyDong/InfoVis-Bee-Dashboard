@@ -6,10 +6,11 @@ import { useApp } from '../context/AppContext';
 import {
   HIVE_IDS, getHiveHealth, getLatestMiteCount,
   getMiteData, getWeightData, getHarvestData,
+  getMiteDataByYear, getWeightDataByYear, getHarvestDataByYear,
   getTotalHarvest, getHiveEvents, getTreatments,
 } from '../data/dataHelpers';
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
+  BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from 'recharts';
 
@@ -178,9 +179,9 @@ export default function HivePage() {
   const treatments   = getTreatments(id, selectedYear);
   const hive         = { id, health, latestMite: latest?.miteCount ?? '—' };
 
-  const miteData    = getMiteData(id, selectedYear);
-  const weightData  = getWeightData(id, selectedYear);
-  const harvestData = getHarvestData(id, selectedYear);
+  const miteData    = selectedYear === 'all' ? getMiteDataByYear(id)    : getMiteData(id, selectedYear);
+  const weightData  = selectedYear === 'all' ? getWeightDataByYear(id)  : getWeightData(id, selectedYear);
+  const harvestData = selectedYear === 'all' ? getHarvestDataByYear(id) : getHarvestData(id, selectedYear);
 
   const treatmentsByType = {};
   treatments.forEach(t => {
@@ -190,9 +191,9 @@ export default function HivePage() {
   const treatmentList = Object.entries(treatmentsByType).sort((a, b) => b[1] - a[1]);
 
   const metrics = [
-    { key: 'mite',    label: '🔬 Mite Count',   data: miteData,    color: '#DC2626', unit: ' mites', threshold: 9 },
+    { key: 'mite',    label: '🔬 Mite Count',   data: miteData,    color: '#DC2626', unit: ' mites', threshold: 9, domain: [0, 12], ticks: [0, 2, 4, 6, 8, 10, 12] },
     { key: 'weight',  label: '⚖️ Hive Weight',  data: weightData,  color: '#F59E0B', unit: ' lbs' },
-    { key: 'harvest', label: '🍯 Honey Harvest', data: harvestData, color: '#16A34A', unit: ' lbs', type: 'bar' },
+    { key: 'harvest', label: '🍯 Honey Harvest', data: harvestData, color: '#16A34A', unit: ' lbs' },
   ];
   const active = metrics.find(m => m.key === activeMetric);
 
@@ -278,30 +279,18 @@ export default function HivePage() {
                 {active.label} — {id} {selectedYear !== 'all' ? `(${selectedYear})` : '(All Years)'}
               </p>
               <ResponsiveContainer width="100%" height={220}>
-                {active.type === 'bar' ? (
-                  <BarChart data={active.data} barSize={20}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#B45309' }} interval="preserveStartEnd" />
-                    <YAxis tick={{ fontSize: 10, fill: '#B45309' }} />
-                    <Tooltip contentStyle={{ fontSize: '12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', fontFamily: 'Nunito' }}
-                      formatter={v => [`${v}${active.unit}`, active.label]} />
-                    <Bar dataKey="value" fill={active.color} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                ) : (
-                  <LineChart data={active.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#B45309' }} interval="preserveStartEnd" />
-                    <YAxis tick={{ fontSize: 10, fill: '#B45309' }} />
-                    <Tooltip contentStyle={{ fontSize: '12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', fontFamily: 'Nunito' }}
-                      formatter={v => [`${v}${active.unit}`, active.label]} />
-                    {active.threshold && (
-                      <ReferenceLine y={active.threshold} stroke="#DC2626" strokeDasharray="5 3"
-                        label={{ value: 'Danger threshold', position: 'insideTopRight', fontSize: 10, fill: '#DC2626' }} />
-                    )}
-                    <Line type="monotone" dataKey="value" stroke={active.color} strokeWidth={2.5}
-                      dot={{ r: 3, fill: active.color }} activeDot={{ r: 5 }} />
-                  </LineChart>
-                )}
+                <BarChart data={active.data} barSize={20}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#B45309' }} interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 10, fill: '#B45309' }} domain={active.domain || [0, 'auto']} ticks={active.ticks} />
+                  <Tooltip contentStyle={{ fontSize: '12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', fontFamily: 'Nunito' }}
+                    formatter={v => [`${v}${active.unit}`, active.label]} />
+                  {active.threshold && (
+                    <ReferenceLine y={active.threshold} stroke="#DC2626" strokeDasharray="5 3"
+                      label={{ value: `Danger threshold (${active.threshold})`, position: 'insideTopRight', fontSize: 10, fill: '#DC2626' }} />
+                  )}
+                  <Bar dataKey="value" fill={active.color} radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
 

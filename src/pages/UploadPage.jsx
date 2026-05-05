@@ -59,6 +59,14 @@ const DATA_TYPES = [
     example: '2025-07-15,Equipment,45.00',
     notes: 'category: Equipment, Medication, Supplies, Consumable',
   },
+  {
+    key: 'vaccines',
+    label: 'Vaccines',
+    icon: '💉',
+    columns: ['hiveId', 'date', 'vaccine'],
+    example: 'H1,2025-06-20,Nosema Treatment',
+    notes: 'hiveId uses H1–H5 format',
+  },
 ];
 
 export default function UploadPage() {
@@ -68,6 +76,7 @@ export default function UploadPage() {
   const [parseError, setParseError] = useState('');
   const [status, setStatus] = useState(null); // null | 'loading' | 'success' | 'error'
   const [statusMsg, setStatusMsg] = useState('');
+  const [lastUpload, setLastUpload] = useState(null); // { type, rows }
   const fileRef = useRef();
 
   const handleTypeChange = (key) => {
@@ -76,6 +85,7 @@ export default function UploadPage() {
     setFileName('');
     setParseError('');
     setStatus(null);
+    setLastUpload(null);
     if (fileRef.current) fileRef.current.value = '';
   };
 
@@ -85,6 +95,7 @@ export default function UploadPage() {
     setParseError('');
     setRows([]);
     setStatus(null);
+    setLastUpload(null);
 
     Papa.parse(file, {
       header: false,
@@ -129,6 +140,7 @@ export default function UploadPage() {
       if (res.ok) {
         setStatus('success');
         setStatusMsg(`Successfully inserted ${data.inserted} row${data.inserted !== 1 ? 's' : ''} into ${selectedType.label}.`);
+        setLastUpload({ type: selectedType, rows: [...rows] });
         setRows([]);
         setFileName('');
         if (fileRef.current) fileRef.current.value = '';
@@ -157,7 +169,7 @@ export default function UploadPage() {
 
         <div className="flex gap-6 flex-wrap items-start">
 
-          {/* Left: type selector + instructions */}
+          {/* Left: type selector */}
           <div className="w-64 shrink-0 flex flex-col gap-4">
             <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-4">
               <p className="font-fredoka text-sm text-amber-800 mb-3">Select Data Type</p>
@@ -174,26 +186,6 @@ export default function UploadPage() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            {/* Column guide */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-              <p className="font-fredoka text-sm text-amber-800 mb-2">{selectedType.icon} {selectedType.label} Format</p>
-              <div className="flex flex-col gap-1 mb-3">
-                {selectedType.columns.map((col, i) => (
-                  <div key={col} className="flex items-center gap-2">
-                    <span className="text-[10px] text-amber-400 font-nunito w-4">{i + 1}.</span>
-                    <code className="text-xs bg-white border border-amber-200 px-1.5 py-0.5 rounded text-amber-700">{col}</code>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[10px] text-amber-400 font-nunito mb-1">Example row:</p>
-              <code className="text-[10px] text-amber-600 bg-white border border-amber-200 rounded px-2 py-1 block break-all">
-                {selectedType.example}
-              </code>
-              {selectedType.notes && (
-                <p className="text-[10px] text-amber-500 mt-2 font-nunito">ℹ️ {selectedType.notes}</p>
-              )}
             </div>
           </div>
 
@@ -226,6 +218,26 @@ export default function UploadPage() {
               />
             </div>
 
+            {/* Column guide */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <p className="font-fredoka text-sm text-amber-800 mb-2">{selectedType.icon} {selectedType.label} Format</p>
+              <div className="flex flex-col gap-1 mb-3">
+                {selectedType.columns.map((col, i) => (
+                  <div key={col} className="flex items-center gap-2">
+                    <span className="text-[10px] text-amber-400 font-nunito w-4">{i + 1}.</span>
+                    <code className="text-xs bg-white border border-amber-200 px-1.5 py-0.5 rounded text-amber-700">{col}</code>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-amber-400 font-nunito mb-1">Example row:</p>
+              <code className="text-[10px] text-amber-600 bg-white border border-amber-200 rounded px-2 py-1 block break-all">
+                {selectedType.example}
+              </code>
+              {selectedType.notes && (
+                <p className="text-[10px] text-amber-500 mt-2 font-nunito">ℹ️ {selectedType.notes}</p>
+              )}
+            </div>
+
             {/* Parse error */}
             {parseError && (
               <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-nunito">
@@ -242,6 +254,40 @@ export default function UploadPage() {
             {status === 'error' && (
               <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-nunito">
                 ❌ {statusMsg}
+              </div>
+            )}
+
+            {/* Last uploaded table */}
+            {lastUpload && (
+              <div className="bg-white border border-green-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-green-100 bg-green-50 flex items-center gap-2">
+                  <span className="text-green-600 text-sm">✅</span>
+                  <p className="font-fredoka text-sm text-green-800">
+                    {lastUpload.type.icon} {lastUpload.type.label} — {lastUpload.rows.length} row{lastUpload.rows.length !== 1 ? 's' : ''} imported
+                  </p>
+                </div>
+                <div className="overflow-x-auto max-h-64 overflow-y-auto">
+                  <table className="w-full text-xs border-collapse">
+                    <thead className="bg-green-50 sticky top-0">
+                      <tr>
+                        <th className="text-left px-3 py-2 text-green-500 font-bold uppercase tracking-wide font-nunito">#</th>
+                        {lastUpload.type.columns.map(col => (
+                          <th key={col} className="text-left px-3 py-2 text-green-500 font-bold uppercase tracking-wide font-nunito">{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lastUpload.rows.map((row, i) => (
+                        <tr key={i} className="border-t border-green-50 hover:bg-green-50/50">
+                          <td className="px-3 py-2 text-green-300 font-nunito">{i + 1}</td>
+                          {lastUpload.type.columns.map(col => (
+                            <td key={col} className="px-3 py-2 text-amber-800 font-nunito">{row[col]}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 

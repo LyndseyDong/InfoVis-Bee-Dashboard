@@ -1,0 +1,877 @@
+================================================================================
+  BUZZTRACKER — BEEKEEPING MANAGEMENT DASHBOARD
+  PRESENTATION SCRIPT & SLIDE CONTENT
+  Estimated Duration: 30 Minutes
+================================================================================
+
+--------------------------------------------------------------------------------
+SLIDE 1 — TITLE SLIDE  [~1 min]
+--------------------------------------------------------------------------------
+
+Title:   BuzzTracker — Beekeeping Management Dashboard
+Tagline: A full-stack data visualization platform for apiary health, finance,
+         and hive management.
+
+Presenter Notes:
+  Welcome everyone. Today I'll be walking you through BuzzTracker — a web
+  application built to help beekeepers monitor, manage, and make sense of data
+  across their entire apiary. This is not just a dashboard — it is a complete
+  data management system with live data entry, CSV uploads, interactive charts,
+  and a treatment calendar. The presentation will cover every page, every chart,
+  the technology stack, the data architecture, and the reasoning behind our
+  accessibility and design decisions.
+
+
+--------------------------------------------------------------------------------
+SLIDE 2 — PROBLEM STATEMENT  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: Why Does This Problem Need Solving?
+
+Key Points:
+  - Beekeepers manage 5–50+ hives simultaneously
+  - Mite infestations are the #1 cause of colony collapse
+  - Treatment timing is critical — too late = dead hive
+  - Finance tracking (honey sales, equipment, medication) is done on paper or
+    spreadsheets
+  - No centralized view to see all hive health at a glance
+  - Comparing hives over time requires manual spreadsheet work
+
+The Gap:
+  - Existing solutions are either too expensive, too complex for small apiaries,
+    or don't visualize data effectively
+  - BuzzTracker fills this gap: a clean, purpose-built dashboard that turns
+    raw CSV data into actionable insights
+
+Real-World Impact:
+  - Varroa mite threshold for a HalfCup sample: 4.5 mites per 100 bees (danger)
+  - Varroa mite threshold for a Cup sample: 9 mites per 100 bees (danger)
+  - A beekeeper who misses a high mite count in October can lose the hive by
+    winter — BuzzTracker makes this impossible to miss
+
+
+--------------------------------------------------------------------------------
+SLIDE 3 — APPLICATION OVERVIEW  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: What Is BuzzTracker?
+
+The Application in One Sentence:
+  BuzzTracker is a React + Node.js dashboard that lets a beekeeper log, upload,
+  visualize, and compare data across 5 hives (Hive1–Hive5) covering health,
+  weight, honey harvest, treatments, vaccines, finances, and events.
+
+Pages in the Application:
+  1. Login Page          — Secure entry point
+  2. Health Overview     — Top-level apiary snapshot (the home page)
+  3. Hive Detail Page    — Deep-dive into a single hive
+  4. Finance Page        — Revenue, expenses, profit analysis
+  5. Compare Page        — Side-by-side hive comparison charts
+  6. Calendar Page       — Monthly treatment & vaccine calendar
+  7. Upload Page         — Bulk CSV import for all data types
+
+Data Types Tracked:
+  - Mite Count (hiveId, date, miteCount, beeSample)
+  - Hive Weight (hiveId, date, weight in lbs)
+  - Honey Harvest (hiveId, date, pounds)
+  - Hive Events (hiveId, date, event type, notes)
+  - Treatments (hiveId, date, treatment name)
+  - Vaccines (hiveId, date, vaccine name)  ← newly added
+  - Revenue / Profit (date, item sold, total revenue)
+  - Expenses (date, category, total cost)
+
+
+--------------------------------------------------------------------------------
+SLIDE 4 — TECHNOLOGY STACK  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: How Was It Built?
+
+Frontend:
+  - React 18 (component-based UI, hooks for state management)
+  - React Router v6 (client-side routing, protected routes)
+  - Recharts (all data visualization — built on D3, React-native)
+  - Tailwind CSS (utility-first styling — amber/honey color palette)
+  - PapaParse (CSV parsing directly in the browser)
+  - Vite (build tool — fast HMR in development)
+
+Backend:
+  - Node.js + Express (REST API server on port 3001)
+  - better-sqlite3 (lightweight embedded SQLite database)
+  - No ORM — raw SQL for full control and performance
+
+Database Tables:
+  mite_count, hive_weight, honey_harvest, hive_events, treatments,
+  vaccines, profit, expenses
+
+Architecture Pattern:
+  - Single-page application (SPA) on the frontend
+  - RESTful API on the backend (GET /api/data, POST /api/upload/:type)
+  - On load: React fetches all data from the API and stores in memory via
+    dataHelpers.js — pure functions transform raw data for each chart
+  - Fallback: if the API is unavailable, the app falls back to a static
+    realData.json seed file
+
+Key Design Decision — dataHelpers.js:
+  All data transformation logic lives in one file (src/data/dataHelpers.js).
+  This means every page calls a pure function like getMiteData(hiveId, year)
+  or getNetProfitByYear() — no business logic in components. This keeps
+  components clean and makes the data layer testable.
+
+
+--------------------------------------------------------------------------------
+SLIDE 5 — LOGIN PAGE  [~1 min]
+--------------------------------------------------------------------------------
+
+Title: Page 1 — Login Page (Route: /login)
+
+What It Does:
+  - Entry point to the application
+  - Accepts any username + password (demo mode)
+  - On success: navigates to the Health Overview page
+  - On failure: shows inline error message
+  - All other routes are protected — if not logged in, React Router
+    redirects to /login automatically
+
+Visual Design:
+  - Animated floating bee emojis (CSS keyframe animations)
+  - Decorative hexagon outlines in the background (SVG polygons, 10% opacity)
+  - Frosted glass card (bg-white/90 + backdrop-blur)
+  - BuzzTracker logo with 🐝 icon
+
+Why This Matters for the Presentation:
+  - The hexagon motif echoes the honeycomb — it appears throughout the app
+  - The amber/honey gradient palette is consistent across every page
+  - First impressions: the login screen signals what the app is about
+    before the user has read a single word
+
+
+--------------------------------------------------------------------------------
+SLIDE 6 — HEALTH OVERVIEW PAGE  [~4 min]
+--------------------------------------------------------------------------------
+
+Title: Page 2 — Health Overview (Route: /)
+Subtitle: The command center of the entire apiary
+
+What the User Sees:
+  - Global year filter (top navbar — All Years, 2021–2025)
+  - 5 KPI stat cards across the top
+  - Honeycomb layout of 5 hives (clickable hexagons)
+  - Health legend panel
+  - Bar chart: Total Honey Harvest by Year
+  - Hive summary table
+
+---
+
+SECTION A: KPI Stat Cards
+
+Cards shown:
+  1. Total Hives — always 5
+  2. Healthy (green) — hives with mite count below threshold
+  3. Watch (orange) — hives at the threshold
+  4. At Risk (red) — hives above threshold
+  5. Total Harvest (lbs) — filtered by selected year
+
+How Health Status Is Calculated:
+  - Latest mite reading is fetched per hive
+  - Threshold depends on bee sample size:
+      HalfCup → danger at 4.5 mites
+      Cup     → danger at 9 mites
+  - Below threshold       → "good" (green)
+  - At threshold          → "watch" (orange)
+  - 1.5× above threshold  → "risk" (red)
+
+Why these cards?
+  A beekeeper opening the app first thing in the morning needs to know
+  immediately: "Are any hives in danger?" These four numbers answer that
+  in under 2 seconds without reading a single chart.
+
+---
+
+SECTION B: Honeycomb Hexagon Layout
+
+What it is:
+  - 5 custom SVG hexagons arranged in a honeycomb pattern
+  - Each hexagon is color-coded: green / orange / red (matching health status)
+  - The number shown inside the hex = the latest mite count for that hive
+  - Clicking a hexagon navigates to that hive's detail page
+
+Why hexagons?
+  - Honeybees build honeycombs — the hexagon is the natural symbol of
+    the domain. It's not decorative; it reinforces what the user is managing.
+  - The honeycomb layout makes it easy to scan all 5 hives at once and
+    identify a red hex immediately, even at a glance.
+
+---
+
+SECTION C: Bar Chart — Total Honey Harvest by Year
+
+Chart Type: Recharts BarChart
+Data Source: getAllHarvestByYear() — sums all hive harvest per year
+X-Axis: Years (2021, 2022, 2023, 2024, 2025)
+Y-Axis: Pounds of honey
+Bar Color: Amber (#F59E0B)
+Rounded bar tops: radius [6, 6, 0, 0]
+
+Why a Bar Chart Here?
+  - Honey harvest is an annual aggregate — it happens in bursts (harvesting
+    season). A bar chart best shows year-over-year comparison of totals.
+  - Line charts imply continuous change; harvest is episodic, so bars are
+    more honest about the data's nature.
+  - The user can immediately answer: "Was this year better than last year?"
+
+Tooltip:
+  - Hovering shows: "{value} lbs — Harvested"
+  - Styled with amber background and rounded corners for visual consistency
+
+---
+
+SECTION D: Hive Summary Table
+
+Columns: Hive | Status | Latest Mite | Harvest (lbs) | View →
+Features:
+  - Clickable rows (navigate to hive detail)
+  - Color-coded status badges (pill style)
+  - Hover state with row highlight
+  - Harvest column respects the global year filter
+
+Why a Table Alongside the Chart?
+  - The chart shows trends; the table shows exact current values
+  - Users who need precise numbers (e.g., "what is Hive3's mite count?")
+    don't need to hover over a chart — the table gives it instantly
+  - Accessibility: tables are screen-reader friendly in ways charts are not
+
+
+--------------------------------------------------------------------------------
+SLIDE 7 — HIVE DETAIL PAGE  [~4 min]
+--------------------------------------------------------------------------------
+
+Title: Page 3 — Hive Detail Page (Route: /hive/:id)
+Subtitle: Every metric for one hive, with full edit capability
+
+What the User Sees:
+  - Back button + hive hexagon icon + health badge
+  - Quick-nav buttons to jump to any of the 5 hives
+  - 4 KPI stat cards
+  - Metric selector tabs (Mite Count / Hive Weight / Honey Harvest)
+  - Line chart or bar chart depending on selected metric
+  - Add Reading inline form
+  - Treatments Applied summary
+  - Event Log (right panel)
+  - Recent Mite Readings list with edit/delete (right panel)
+
+---
+
+SECTION A: 4 KPI Cards
+
+  1. Latest Mite Count — colored based on health threshold
+  2. Sample Size — HalfCup or Cup (affects threshold calculation)
+  3. Harvest (filtered by year) — in lbs
+  4. Treatments Applied — count for the selected year/all time
+
+---
+
+SECTION B: Charts — 3 Metrics, 2 Chart Types
+
+Metric 1 — Mite Count
+  Chart Type: Recharts LineChart
+  Data: getMiteData(hiveId, year) — sorted by date
+  Line Color: Red (#DC2626)
+  Special Feature: ReferenceLine at y=9 (red dashed "Danger Threshold" line)
+  Why a line chart?
+    Mite count changes continuously over time as mites reproduce and treatments
+    are applied. A line shows the trajectory — is it climbing or falling?
+    The red threshold line gives instant context: readings above it are
+    dangerous. A beekeeper can see "the count spiked in July, then dropped
+    after the August treatment."
+
+Metric 2 — Hive Weight
+  Chart Type: Recharts LineChart
+  Data: getWeightData(hiveId, year) — sorted by date
+  Line Color: Amber (#F59E0B)
+  Why a line chart?
+    Weight changes gradually as nectar flows build up in the hive and is
+    harvested. A line reveals the seasonal weight curve — climbing in
+    spring/summer, dropping at harvest. Sudden drops can indicate swarming.
+
+Metric 3 — Honey Harvest
+  Chart Type: Recharts BarChart
+  Data: getHarvestData(hiveId, year) — sorted by date
+  Bar Color: Green (#16A34A)
+  Why a bar chart here but a line for weight?
+    Harvest events are discrete — a beekeeper harvests 30 lbs on one specific
+    day, not gradually. Bars represent these individual events accurately.
+    A line would imply continuous accumulation, which misrepresents reality.
+
+Interactivity:
+  - All charts have hover tooltips (value + unit + metric name)
+  - X-axis shows date (month-year format), Y-axis shows unit
+  - Charts re-render when the year filter changes (global state)
+  - "Add Reading" button toggles an inline form below the selector tabs
+
+---
+
+SECTION C: Add Reading Form
+
+  - Inline (no modal) — appears below metric tabs
+  - Fields: Date, Value (number), Sample type (for mite only)
+  - POST to /api/miteCount, /api/hiveWeight, or /api/honeyHarvest
+  - On save: refreshData() is called — re-fetches from server, increments
+    refreshKey in React context, causing all charts to re-render with new data
+
+---
+
+SECTION D: Treatments Applied
+
+  - Counts how many times each treatment was used for this hive in the
+    selected year
+  - Shown as visual count cards: e.g., "3 — Oxalic Acid", "2 — None"
+  - "None" entries are styled differently (amber) vs actual treatments (blue)
+  - Helps a beekeeper quickly audit: "Did I treat this hive enough this year?"
+
+---
+
+SECTION E: Event Log
+
+Events tracked: HiveDeath 💀, Replaced 🆕, Split ✂️
+Display:
+  - Left-colored border (red for HiveDeath, green for Replaced, blue for Split)
+  - Date, event type, and any notes
+  - Events are listed chronologically
+Why this matters:
+  - Colony history is critical — if you know Hive2 split in May 2023, the
+    new queen's laying pattern explains the mite data that followed
+  - This context cannot be read from a chart alone
+
+---
+
+SECTION F: Recent Mite Readings (Editable)
+
+  - Shows last 8 readings with a mini progress bar per reading
+  - Bar color: green (low) → orange (mid) → red (high)
+  - Hover reveals ✏️ Edit and 🗑 Delete buttons
+  - Edit: inline form replaces the reading row
+  - Delete: confirmation dialog → DELETE /api/miteCount/:id
+  - After save/delete: refreshData() triggers a full re-render
+
+Why editable inline vs. a separate edit page?
+  Beekeepers often enter data in the field on a phone and need to correct a typo.
+  Opening a full edit page breaks their workflow. Inline editing is faster and
+  more intuitive.
+
+
+--------------------------------------------------------------------------------
+SLIDE 8 — FINANCE PAGE  [~4 min]
+--------------------------------------------------------------------------------
+
+Title: Page 4 — Finance Overview (Route: /finance)
+Subtitle: Revenue, expenses, profit — year over year
+
+What the User Sees:
+  - 4 KPI cards across the top
+  - 3 view tabs: Revenue vs Expenses | Expense Breakdown | Revenue by Product
+  - Charts change based on selected tab + global year filter
+
+---
+
+SECTION A: KPI Cards
+
+  1. Total Revenue — sum of all sales (green)
+  2. Total Expenses — sum of all costs (red)
+  3. Net Profit — revenue minus expenses (green if positive, red if negative)
+  4. Profit Margin — net profit / revenue as a percentage (amber)
+
+Why show margin alongside absolute numbers?
+  A beekeeper might earn $5,000 in revenue, but if expenses were $4,800,
+  the margin is only 4% — barely profitable. Showing both gives a complete
+  financial picture.
+
+---
+
+SECTION B: Tab 1 — Revenue vs Expenses
+
+Charts:
+  1. Grouped Bar Chart — Revenue vs Expenses by Year
+     Chart Type: Recharts BarChart with two bars per year group
+     Bars: Revenue (green #16A34A) + Expenses (red #DC2626)
+     Both bars share the same X-axis year position (barGap: 4)
+     Why grouped bars?
+       The beekeeper needs to compare the two numbers at the same point in
+       time. Side-by-side bars make the relationship (is revenue > expenses?)
+       immediately obvious without reading numbers. A stacked bar would hide
+       the comparison; separate charts would require eye movement.
+
+  2. Line Chart — Net Profit Trend
+     Chart Type: Recharts LineChart
+     Line Color: Amber (#F59E0B)
+     Dots shown at each year with activeDot on hover
+     Why a line for profit trend?
+       Net profit is a derived continuous value — is the operation becoming
+       more profitable year over year? A line answers this better than bars
+       because it emphasizes the trajectory (slope) rather than magnitude.
+
+Custom Tooltip:
+  Both charts use a shared ChartTooltip component that shows values formatted
+  as "$1,234" — currency formatting makes the numbers human-readable instantly.
+
+---
+
+SECTION C: Tab 2 — Expense Breakdown
+
+Charts:
+  1. Pie Chart — Expenses by Category
+     Chart Type: Recharts PieChart with Pie + Cell components
+     Segments: Equipment (amber), Medication (red), Supplies (green),
+               Consumable (blue)
+     Labels: category name + percentage, rendered outside the slice
+     Why a pie chart?
+       Expense distribution is a part-of-whole question: "What percentage
+       of my budget goes to medication vs equipment?" Pie charts are ideal
+       for this — they show proportion at a glance. We use them here because
+       there are only 4 categories (pie charts lose effectiveness with >6-7
+       slices).
+
+  2. Category Details — Progress Bar List
+     Shows each category with a horizontal progress bar indicating its
+     share of total expenses
+     The fill percentage = category total / total expenses × 100
+     Why show both the pie and the bar list?
+       The pie shows the big picture; the bar list shows precise values.
+       Together they serve both "overview" and "detail" users without
+       switching between pages.
+
+---
+
+SECTION D: Tab 3 — Revenue by Product
+
+Charts:
+  1. Horizontal Bar Chart — Revenue by Product
+     Chart Type: Recharts BarChart with layout="vertical"
+     X-axis: Dollar amount (number)
+     Y-axis: Product name (category)
+     Bar colors: cycle through a palette of 8 colors (one per product)
+     Why horizontal?
+       Product names are text labels. Horizontal bars give each label room
+       to be fully readable without rotation. Vertical bars with long text
+       labels either overlap or require a 45-degree tilt — both hurt
+       readability.
+
+  2. Product Ranking List
+     Shows products ranked #1, #2, #3... with their revenue
+     Color-coded to match the chart bars
+     Why the ranking list?
+       Beekeepers want to know: "What sells best?" A ranked list answers
+       this directly. The chart shows comparison; the list shows order.
+
+
+--------------------------------------------------------------------------------
+SLIDE 9 — COMPARE PAGE  [~3 min]
+--------------------------------------------------------------------------------
+
+Title: Page 5 — Hive Comparison (Route: /compare)
+Subtitle: Place all hives side by side to find patterns
+
+What the User Sees:
+  - Hive selector buttons (toggle individual hives on/off, min 2 required)
+  - Metric selector (Mite Count / Hive Weight / Honey Harvest)
+  - Grouped bar chart showing all selected hives for the chosen metric
+  - Side-by-side summary cards at the bottom
+
+---
+
+SECTION A: Hive Selector
+
+  - Each hive button is color-coded (Hive1=amber, Hive2=green, Hive3=blue,
+    Hive4=purple, Hive5=red)
+  - A small health status dot appears on each button
+  - Clicking toggles a hive off — minimum 2 must always remain selected
+  - If only 2 are selected, both become disabled (can't remove either)
+  - Disabled state: opacity 50%, cursor not-allowed
+
+Why enforce a minimum of 2?
+  A comparison with 1 hive is not a comparison — it's a single-hive view
+  (that's what the Hive Detail page is for). The UI rule enforces the
+  semantic purpose of this page.
+
+---
+
+SECTION B: Grouped Bar Chart
+
+Chart Type: Recharts BarChart
+Grouping Logic:
+  - If "All Years" is selected: data is aggregated by YEAR (each group = 1 year)
+  - If a specific year is selected: data is aggregated by QUARTER (Q1, Q2, Q3, Q4)
+  This gives the most useful granularity at each zoom level.
+
+Per-Hive Bars: Each selected hive gets its own color-coded bar in each group
+Bar Width: Fixed at 14px (never stretches — stays readable at any screen size)
+Legend: Shows hive names with their colors
+
+Why quarterly vs yearly depending on filter?
+  When viewing all 5 years, quarterly data would create 20 groups × 5 hives =
+  100 bars — unreadable. Yearly data creates 5 groups × 5 hives = 25 bars —
+  clean. When zoomed into a single year, quarterly data gives enough granularity
+  to see seasonal patterns.
+
+---
+
+SECTION C: Side-by-Side Summary Cards
+
+  - One card per selected hive
+  - Card border + background uses each hive's color with low opacity
+  - Shows: Health status, Latest Mite Count, Total Harvest
+  - Cards are laid out in a CSS grid that adapts to the number of selected hives
+
+Why summary cards below the chart?
+  The chart shows patterns across time. The cards show the current state.
+  A beekeeper might ask "Hive3 has been trending high in mite count —
+  what's its health status right now?" The card answers this instantly
+  without navigating away.
+
+
+--------------------------------------------------------------------------------
+SLIDE 10 — CALENDAR PAGE  [~3 min]
+--------------------------------------------------------------------------------
+
+Title: Page 6 — Treatment & Vaccine Calendar (Route: /calendar)
+Subtitle: Every treatment and vaccine, exactly when it happened
+
+What the User Sees:
+  - Month navigation (back/forward arrows)
+  - Full monthly grid calendar
+  - Colored dots on days that have treatments or vaccines
+  - Click a day to expand a detail tooltip
+  - Right sidebar: hive legend, monthly summary, year jump
+
+---
+
+SECTION A: The Calendar Grid
+
+  - Standard 7-column grid (Sun–Sat)
+  - Days without events: empty
+  - Days with treatments: colored CIRCLE dots (●) per hive
+  - Days with vaccines: colored SQUARE dots (■) per hive
+  - The shape difference (circle vs square) lets users distinguish treatment
+    type at a glance without color alone — this is an accessibility feature
+  - Today's date: amber circle background on the day number
+
+Dot Colors:
+  Hive1=amber, Hive2=green, Hive3=blue, Hive4=purple, Hive5=red
+  (Same palette used across the entire application for consistency)
+
+Overflow handling:
+  If a day has more than 4 events, the 5th+ shows as "+N" text
+
+---
+
+SECTION B: Day Detail Popup
+
+Clicking a day with events shows an expandable panel below the calendar:
+  - Date header
+  - "💊 Treatments" section (if any)
+    Each treatment: colored dot + hive name + treatment type
+  - "💉 Vaccines" section (if any)
+    Each vaccine: colored square + hive name + vaccine name
+  - Close button (×)
+
+Why a panel instead of a modal?
+  A panel that slides in below the calendar keeps the user's context — they
+  can still see the full calendar and navigate to other days without dismissing
+  a modal. It's less disruptive.
+
+---
+
+SECTION C: Monthly Summary Panel (Right Sidebar)
+
+  - Shows "💊 Treatments" count + hives treated + dates
+  - Shows "💉 Vaccines" count + hives vaccinated + dates
+  - If nothing this month: "No treatments or vaccines this month."
+  - Header subtitle shows event count: "X treatments this month"
+
+Why this matters:
+  In beekeeping, timing is everything. A beekeeper might ask: "Did I treat
+  all 5 hives in August?" The summary answers this without clicking through
+  individual hive pages.
+
+---
+
+SECTION D: Quick Year Jump + Hive Legend
+
+  - Buttons for 2021–2025 to jump directly to a year
+  - Hive legend: colored dot + hive name for quick reference
+
+
+--------------------------------------------------------------------------------
+SLIDE 11 — UPLOAD PAGE  [~3 min]
+--------------------------------------------------------------------------------
+
+Title: Page 7 — Upload Data (Route: /upload)
+Subtitle: Import any data type via CSV in seconds
+
+What the User Sees:
+  - Left sidebar: data type selector (7 types + newly added vaccines = 8)
+  - Right area: drag-and-drop zone
+  - Below drop zone: column format guide + example row
+  - Preview table (after file is selected)
+  - Import button
+
+---
+
+SECTION A: Data Types Available for Upload
+
+  1. 🔬 Mite Count     — hiveId, date, miteCount, beeSample
+  2. ⚖️  Hive Weight   — hiveId, date, weight
+  3. 🍯 Honey Harvest  — hiveId, date, pounds
+  4. 📋 Hive Events    — hiveId, date, event, notes
+  5. 💊 Treatments     — hiveId, date, treatment
+  6. 💰 Revenue/Profit — date, itemSold, totalRevenue
+  7. 🧾 Expenses       — date, category, totalCost
+  8. 💉 Vaccines       — hiveId, date, vaccine   ← newly added
+
+---
+
+SECTION B: The Upload Flow
+
+Step 1 — Select data type from the left sidebar
+  - Switching type clears the current file and preview
+
+Step 2 — Drop or click to upload a CSV file
+  - Drag-and-drop is supported (handleDrop + onDragOver handlers)
+  - Click opens the native file picker
+  - Only .csv files accepted
+
+Step 3 — PapaParse parses the CSV in the browser
+  - No server round-trip just for parsing
+  - Automatically detects and strips header rows
+  - Validates that at least 1 data row exists
+  - Maps each row to the expected column schema
+
+Step 4 — Preview table shows the parsed data
+  - Shows up to 50 rows (+ "{N} more rows" for larger files)
+  - Column headers match the expected schema
+  - User can review data before committing
+
+Step 5 — Click "Import N Rows"
+  - POST /api/upload/{dataType} with JSON body { rows: [...] }
+  - Server runs a SQL transaction (all rows succeed or none do)
+  - Success: green banner with row count
+  - Error: red banner with the error message
+
+Why PapaParse in the browser?
+  - Instant feedback — no round-trip latency for parsing
+  - The user sees their data before committing
+  - Catches format errors (wrong column count, empty file) before
+    hitting the server
+
+---
+
+SECTION C: Column Guide (Below the Drop Zone)
+
+  - Shows numbered list of required columns for the selected data type
+  - Shows an example CSV row
+  - Shows notes (e.g., "beeSample: HalfCup or Cup", "hiveId uses H1–H5 format")
+
+Why below the drop zone?
+  We moved the instructions from the sidebar to below the upload area so
+  the user sees the format guide immediately after dropping a file — right
+  where they're looking.
+
+
+--------------------------------------------------------------------------------
+SLIDE 12 — CHARTS: FULL REFERENCE TABLE  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: Chart Choices — The Right Chart for the Right Data
+
++------------------+-------------------+-----------------------------+------------------------------------+
+| Page             | Chart Type        | Data Shown                  | Why This Chart Type                |
++------------------+-------------------+-----------------------------+------------------------------------+
+| Health Overview  | Bar Chart         | Annual honey harvest        | Annual totals — bars show magnitude|
+| Hive Detail      | Line Chart        | Mite count over time        | Continuous trend + threshold line  |
+| Hive Detail      | Line Chart        | Hive weight over time       | Seasonal weight curve, trajectory  |
+| Hive Detail      | Bar Chart         | Honey harvest events        | Discrete harvest events, not trend |
+| Finance          | Grouped Bar Chart | Revenue vs Expenses by year | Compare two values same time point |
+| Finance          | Line Chart        | Net profit trend            | Trajectory of derived value        |
+| Finance          | Pie Chart         | Expense by category         | Part-of-whole, 4 categories max    |
+| Finance          | Horizontal Bar    | Revenue by product          | Long text labels, ranked values    |
+| Compare          | Grouped Bar Chart | Multi-hive metric by period | Side-by-side comparison, 2-5 bars  |
++------------------+-------------------+-----------------------------+------------------------------------+
+
+Key Principles Applied:
+  - Line chart → when the question is "how is this changing over time?"
+  - Bar chart  → when the question is "how much / how many?"
+  - Pie chart  → when the question is "what proportion?" (< 6 categories)
+  - Grouped bar → when comparing multiple entities at the same time point
+  - Horizontal bar → when category labels are long text strings
+
+
+--------------------------------------------------------------------------------
+SLIDE 13 — ACCESSIBILITY & DESIGN  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: Accessibility & Design Decisions
+
+Why Accessibility Matters in a Data Dashboard:
+  - Dashboards are information-dense — poor design causes cognitive overload
+  - Beekeepers may use tablets or phones in the field — touch targets matter
+  - Color-blind users: using ONLY color to convey status fails 8% of men
+
+Specific Accessibility Features in BuzzTracker:
+
+1. Color Is Never the Only Signal
+   - Health status: green dot + "Good" text (not just a green dot)
+   - Treatments vs Vaccines on the calendar:
+       Treatments = CIRCLE dots (●)
+       Vaccines = SQUARE dots (■)
+     A red-green color blind user can still tell them apart by shape.
+   - Status badges: "● good", "● watch", "● risk" — text accompanies color
+
+2. Semantic HTML + Table Structure
+   - The Hive Summary on the Health Overview is a proper <table> with
+     <thead> and column headers
+   - Screen readers can navigate tables by row/column
+   - This is explicitly more accessible than a CSS grid of divs
+
+3. Keyboard-Friendly Forms
+   - All forms use <label> elements connected to inputs
+   - Focus states: focus:ring-2 focus:ring-amber-300 on every input
+   - Tab order follows logical reading order
+
+4. Touch-Friendly Targets
+   - All buttons are minimum 32px height (Tailwind h-8 / py-2)
+   - Navigation links use px-3 py-1.5 for comfortable tap area
+   - The calendar day cells are min-h-[68px] — large enough to tap on mobile
+
+5. Responsive Layout
+   - All pages use flex-wrap or CSS grid with min-width constraints
+   - Charts use Recharts ResponsiveContainer — they reflow at any width
+   - The navbar scrolls horizontally on small screens (overflow-x-auto)
+
+6. Readable Typography
+   - Two font families: Fredoka (headings — friendly, rounded) and
+     Nunito (body — highly legible at small sizes)
+   - Minimum font size: 10px for secondary labels (column headers, footnotes)
+   - Main body text: 12–14px
+
+7. Loading & Error States
+   - Application shows a loading spinner + progress bar while fetching data
+   - Upload page shows green success banners and red error banners
+   - Parse errors are shown inline before the user submits anything
+   - Every form has error message slots
+
+8. Global Year Filter
+   - A single dropdown in the navbar filters ALL charts on ALL pages
+   - This is a deliberate design choice: the user doesn't need to remember to
+     set a year filter on each page separately. One action, app-wide effect.
+
+
+--------------------------------------------------------------------------------
+SLIDE 14 — DATA FLOW ARCHITECTURE  [~1 min]
+--------------------------------------------------------------------------------
+
+Title: How Data Moves Through the Application
+
+On App Load:
+  AppContext.jsx → fetch('/api/data') → setApiData(data)
+  All raw data is stored in a module-level variable in dataHelpers.js
+
+On Each Page Render:
+  Component → calls helper function (e.g., getMiteData('Hive1', '2024'))
+            → helper filters/transforms rawData
+            → returns clean array for Recharts
+
+On Data Entry (Add Reading, Upload CSV):
+  Component → POST /api/... → server writes to SQLite
+            → refreshData() called in AppContext
+            → re-fetches /api/data → setApiData(newData)
+            → setRefreshKey(k => k + 1)
+            → all components that use refreshKey re-render
+
+Fallback Mode:
+  If the Express server is not running (e.g., demo/static deployment):
+  AppContext catches the fetch error silently
+  rawData remains as the imported realData.json static seed
+  The app still works — just read-only
+
+
+--------------------------------------------------------------------------------
+SLIDE 15 — CONCLUSION & FUTURE WORK  [~2 min]
+--------------------------------------------------------------------------------
+
+Title: What BuzzTracker Delivers & Where It Can Go
+
+What We Built:
+  - 7 fully functional pages covering health, finance, comparison, calendar,
+    and data upload
+  - 9 chart types across 5 Recharts components
+  - Full CRUD: add, edit, delete mite readings; bulk upload 8 data types
+  - Real-time data refresh without page reload
+  - Treatment AND vaccine calendar with shape-coded indicators
+  - Accessible, responsive, consistent design system
+
+The Problem It Solves:
+  - A beekeeper can open BuzzTracker, see which hives are at risk in 2 seconds,
+    drill down to the trend, log a new treatment, check their annual profit, and
+    plan next month's vaccine schedule — all in one tool.
+
+Potential Future Features:
+  - Push notifications when a hive crosses the mite danger threshold
+  - Weather API integration (hive weight drops often correlate with rain)
+  - Multiple apiaries / locations support
+  - PDF export of monthly hive health reports
+  - Mobile native app (React Native reuse of data layer)
+  - Predictive alerts using mite count trend analysis
+
+Key Takeaways for the Audience:
+  1. Chart choice is a design decision — the wrong chart type misrepresents data
+  2. Accessibility means more than color contrast — shape, text, structure matter
+  3. A pure data transformation layer (dataHelpers.js) keeps components clean
+  4. Global state (year filter) that affects all pages eliminates friction
+
+
+================================================================================
+  TIMING GUIDE
+================================================================================
+
+Slide 1  — Title Slide                     1 min
+Slide 2  — Problem Statement               2 min
+Slide 3  — Application Overview            2 min
+Slide 4  — Technology Stack                2 min
+Slide 5  — Login Page                      1 min
+Slide 6  — Health Overview Page            4 min
+Slide 7  — Hive Detail Page                4 min
+Slide 8  — Finance Page                    4 min
+Slide 9  — Compare Page                    3 min
+Slide 10 — Calendar Page                   3 min
+Slide 11 — Upload Page                     3 min
+Slide 12 — Charts Reference Table          2 min
+Slide 13 — Accessibility & Design          2 min
+Slide 14 — Data Flow Architecture          1 min
+Slide 15 — Conclusion & Future Work        2 min
+                                    ─────────────
+                                    TOTAL: 30 min
+
+
+================================================================================
+  LIVE DEMO CHECKLIST (if demoing the app during the presentation)
+================================================================================
+
+Before the presentation:
+  [ ] Run: npm install && npm run dev (frontend on port 5173)
+  [ ] Run: cd server && node index.js (backend on port 3001)
+  [ ] Log in with any username and password
+
+Demo flow (weave into the 30 min):
+  1. Show login screen (Slide 5)
+  2. Show health overview — point out the honeycomb, stat cards, bar chart
+  3. Click Hive1 — show mite chart with danger line, switch to weight chart
+  4. Add a new mite reading live — watch chart update
+  5. Switch to Finance page — show all 3 tabs
+  6. Switch to Compare page — toggle a hive off/on, change year
+  7. Switch to Calendar — navigate to a month with treatments
+  8. Switch to Upload — show a pre-prepared CSV, preview it (don't import live)
+
+
+================================================================================
+  END OF PRESENTATION DOCUMENT
+================================================================================

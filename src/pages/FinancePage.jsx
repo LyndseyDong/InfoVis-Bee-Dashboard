@@ -129,21 +129,6 @@ export default function FinancePage() {
         {/* Expenses */}
         {activeView === 'expenses' && (
           <div className="flex gap-5 flex-wrap">
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 w-80 shrink-0">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Expenses by Category</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie data={expCat} dataKey="total" nameKey="category" cx="50%" cy="50%" outerRadius={90}
-                    label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {expCat.map((e, i) => <Cell key={i} fill={CAT_COLORS[e.category] || '#999'} />)}
-                  </Pie>
-                  <Tooltip formatter={v => [`$${v}`, 'Total']} contentStyle={{ fontSize: 12, fontFamily: 'Nunito', borderRadius: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
             <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[280px]">
               <p className="font-fredoka text-base text-amber-900 mb-4">Category Details</p>
               {[...expCat].sort((a, b) => b.total - a.total).map(cat => {

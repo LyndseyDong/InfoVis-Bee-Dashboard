@@ -5,11 +5,11 @@ import { HIVE_IDS, getCompareDataByQuarter, getCompareDataByYear, getTotalHarves
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 const HIVE_COLORS = {
-  Hive1: '#F59E0B',
-  Hive2: '#16A34A',
-  Hive3: '#2563EB',
-  Hive4: '#9333EA',
-  Hive5: '#DC2626',
+  Hive1: '#d7191c',
+  Hive2: '#fdae61',
+  Hive3: '#ffffbf',
+  Hive4: '#abdda4',
+  Hive5: '#2b83ba',
 };
 
 const METRICS = [
@@ -86,9 +86,9 @@ export default function ComparePage() {
                     disabled={wouldDropBelowMin}
                     title={wouldDropBelowMin ? 'At least 2 hives must be selected' : ''}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 font-bold text-sm transition-all font-nunito
-                      ${isOn ? 'text-white shadow-md' : 'bg-white text-amber-500 border-amber-200 hover:border-amber-400'}
+                      ${isOn ? 'shadow-md' : 'bg-white text-amber-500 border-amber-200 hover:border-amber-400'}
                       ${wouldDropBelowMin ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    style={isOn ? { background: color, borderColor: color } : {}}
+                    style={isOn ? { background: color, borderColor: color, color: '#1a1a1a' } : {}}
                   >
                     {id}
                     <span className={`w-1.5 h-1.5 rounded-full ${

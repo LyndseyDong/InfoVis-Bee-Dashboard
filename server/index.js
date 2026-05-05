@@ -33,6 +33,9 @@ app.get('/api/data', (_req, res) => {
       expenses: db.prepare(
         'SELECT id, date, category, total_cost as totalCost FROM expenses ORDER BY date'
       ).all(),
+      vaccines: db.prepare(
+        'SELECT id, hive_id as hiveId, date, vaccine FROM vaccines ORDER BY date'
+      ).all(),
     };
     res.json(data);
   } catch (e) {
@@ -83,6 +86,10 @@ app.post('/api/upload/profit', uploadRoute(
 app.post('/api/upload/expenses', uploadRoute(
   'INSERT INTO expenses (date, category, total_cost) VALUES (?, ?, ?)',
   r => [r.date, r.category, parseFloat(r.totalCost)]
+));
+app.post('/api/upload/vaccines', uploadRoute(
+  'INSERT INTO vaccines (hive_id, date, vaccine) VALUES (?, ?, ?)',
+  r => [r.hiveId, r.date, r.vaccine || null]
 ));
 
 // ── Single-record quick-add (POST) ────────────────────────────────────────────

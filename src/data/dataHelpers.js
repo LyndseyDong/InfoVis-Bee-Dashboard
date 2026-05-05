@@ -52,6 +52,44 @@ export function getHarvestData(hiveId, year = 'all') {
     .map(r => ({ id: r.id, date: r.date.slice(0, 7), rawDate: r.date, value: r.pounds }));
 }
 
+export function getMiteDataByYear(hiveId) {
+  const byYear = {};
+  rawData.miteCount.filter(r => r.hiveId === hiveId).forEach(r => {
+    const y = r.date.slice(0, 4);
+    if (!byYear[y]) byYear[y] = [];
+    byYear[y].push(r.miteCount);
+  });
+  return Object.keys(byYear).sort().map(y => ({
+    date: y,
+    value: Math.round((byYear[y].reduce((s, v) => s + v, 0) / byYear[y].length) * 10) / 10,
+  }));
+}
+
+export function getWeightDataByYear(hiveId) {
+  const byYear = {};
+  rawData.hiveWeight.filter(r => r.hiveId === hiveId).forEach(r => {
+    const y = r.date.slice(0, 4);
+    if (!byYear[y]) byYear[y] = [];
+    byYear[y].push(r.weight);
+  });
+  return Object.keys(byYear).sort().map(y => ({
+    date: y,
+    value: Math.round((byYear[y].reduce((s, v) => s + v, 0) / byYear[y].length) * 10) / 10,
+  }));
+}
+
+export function getHarvestDataByYear(hiveId) {
+  const byYear = {};
+  rawData.honeyHarvest.filter(r => r.hiveId === hiveId).forEach(r => {
+    const y = r.date.slice(0, 4);
+    byYear[y] = (byYear[y] || 0) + r.pounds;
+  });
+  return Object.keys(byYear).sort().map(y => ({
+    date: y,
+    value: Math.round(byYear[y]),
+  }));
+}
+
 export function getTotalHarvest(hiveId, year = 'all') {
   return rawData.honeyHarvest
     .filter(r => r.hiveId === hiveId && (year === 'all' || r.date.startsWith(year)))
@@ -79,9 +117,54 @@ export function getAllTreatmentsByDate() {
   rawData.treatments.forEach(t => {
     if (!t.treatment || t.treatment === 'None') return;
     if (!result[t.date]) result[t.date] = [];
-    // Normalize H1→Hive1 for display consistency
     const displayId = t.hiveId.startsWith('Hive') ? t.hiveId : `Hive${t.hiveId.slice(1)}`;
     result[t.date].push({ hiveId: displayId, treatment: t.treatment });
+  });
+  return result;
+}
+
+// Returns { 'YYYY-MM-DD': [{ hiveId, miteCount }] } for readings >= 9 (danger threshold)
+export function getAllMiteAlertsByDate() {
+  const result = {};
+  rawData.miteCount.forEach(r => {
+    if (r.miteCount < 9) return;
+    if (!result[r.date]) result[r.date] = [];
+    const displayId = r.hiveId.startsWith('Hive') ? r.hiveId : `Hive${r.hiveId.slice(1)}`;
+    result[r.date].push({ hiveId: displayId, miteCount: r.miteCount });
+  });
+  return result;
+}
+
+// Returns { 'YYYY-MM-DD': [{ hiveId, lastTreatment, lastDate }] }
+// due date = last treatment date + intervalDays per hive
+export function getNextTreatmentDueDates(intervalDays = 14) {
+  const lastByHive = {};
+  rawData.treatments.forEach(t => {
+    if (!t.treatment || t.treatment === 'None') return;
+    const displayId = t.hiveId.startsWith('Hive') ? t.hiveId : `Hive${t.hiveId.slice(1)}`;
+    if (!lastByHive[displayId] || t.date > lastByHive[displayId].date) {
+      lastByHive[displayId] = { date: t.date, treatment: t.treatment };
+    }
+  });
+  const result = {};
+  Object.entries(lastByHive).forEach(([hiveId, { date, treatment }]) => {
+    const due = new Date(date);
+    due.setDate(due.getDate() + intervalDays);
+    const dueDateStr = due.toISOString().slice(0, 10);
+    if (!result[dueDateStr]) result[dueDateStr] = [];
+    result[dueDateStr].push({ hiveId, lastTreatment: treatment, lastDate: date });
+  });
+  return result;
+}
+
+// Returns { 'YYYY-MM-DD': [{ hiveId, vaccine }] } for all non-null vaccines
+export function getAllVaccinesByDate() {
+  const result = {};
+  (rawData.vaccines || []).forEach(v => {
+    if (!v.vaccine || v.vaccine === 'None') return;
+    if (!result[v.date]) result[v.date] = [];
+    const displayId = v.hiveId.startsWith('Hive') ? v.hiveId : `Hive${v.hiveId.slice(1)}`;
+    result[v.date].push({ hiveId: displayId, vaccine: v.vaccine });
   });
   return result;
 }
