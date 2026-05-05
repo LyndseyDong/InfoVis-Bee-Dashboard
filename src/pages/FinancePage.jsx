@@ -16,13 +16,21 @@ const CAT_COLORS = {
   Supplies:   '#16A34A',
   Consumable: '#2563EB',
 };
-const ITEM_COLORS = ['#F59E0B', '#16A34A', '#2563EB', '#9333EA', '#F97316', '#06B6D4', '#EC4899', '#64748B'];
+
+const ITEM_COLORS = [
+  '#F59E0B', '#16A34A', '#2563EB', '#9333EA',
+  '#F97316', '#06B6D4', '#EC4899', '#64748B'
+];
 
 function StatCard({ label, value, sub, valueClass }) {
   return (
     <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[150px]">
-      <p className="text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1 font-nunito">{label}</p>
-      <p className={`font-fredoka text-3xl leading-none ${valueClass || 'text-amber-900'}`}>{value}</p>
+      <p className="text-[11px] font-bold text-amber-400 uppercase tracking-widest mb-1 font-nunito">
+        {label}
+      </p>
+      <p className={`font-fredoka text-3xl leading-none ${valueClass || 'text-amber-900'}`}>
+        {value}
+      </p>
       {sub && <p className="text-[11px] text-amber-400 mt-1 font-nunito">{sub}</p>}
     </div>
   );
@@ -34,7 +42,9 @@ const ChartTooltip = ({ active, payload, label }) => {
     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs font-nunito shadow-sm">
       <p className="font-bold mb-1 text-amber-900">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>{p.name}: ${p.value?.toLocaleString()}</p>
+        <p key={i} style={{ color: p.color }}>
+          {p.name}: ${p.value?.toLocaleString()}
+        </p>
       ))}
     </div>
   );
@@ -50,6 +60,9 @@ export default function FinancePage() {
   const { selectedYear } = useApp();
   const [activeView, setActiveView] = useState('overview');
 
+  // sort state for ranking list only
+  const [sortOrder, setSortOrder] = useState('desc'); // desc = highest first
+
   const profitData = getNetProfitByYear();
   const expCat     = getExpensesByCategory(selectedYear);
   const revItems   = getRevenueByItem(selectedYear);
@@ -57,6 +70,10 @@ export default function FinancePage() {
   const totalExp   = getTotalExpenses(selectedYear);
   const netProfit  = totalRev - totalExp;
   const margin     = totalRev > 0 ? Math.round((netProfit / totalRev) * 100) : null;
+
+  const sortedRevItems = [...revItems].sort((a, b) =>
+    sortOrder === 'desc' ? b.total - a.total : a.total - b.total
+  );
 
   return (
     <div className="page">
@@ -71,132 +88,148 @@ export default function FinancePage() {
           </p>
         </div>
 
-        {/* KPI cards */}
+        {/* KPI */}
         <div className="flex gap-3 flex-wrap mb-7">
-          <StatCard label="Total Revenue"  value={`$${totalRev.toLocaleString()}`}  sub="from all sales"            valueClass="text-green-600" />
-          <StatCard label="Total Expenses" value={`$${totalExp.toLocaleString()}`}  sub="equipment, meds, supplies" valueClass="text-red-600" />
-          <StatCard label="Net Profit"     value={`$${netProfit.toLocaleString()}`} sub="revenue minus expenses"    valueClass={netProfit >= 0 ? 'text-green-600' : 'text-red-600'} />
-          <StatCard label="Profit Margin"  value={margin !== null ? `${margin}%` : '—'} sub="net / revenue"         valueClass="text-honey-600" />
+          <StatCard label="Total Revenue" value={`$${totalRev.toLocaleString()}`} sub="sales" valueClass="text-green-600" />
+          <StatCard label="Total Expenses" value={`$${totalExp.toLocaleString()}`} sub="costs" valueClass="text-red-600" />
+          <StatCard label="Net Profit" value={`$${netProfit.toLocaleString()}`} sub="net" valueClass={netProfit >= 0 ? 'text-green-600' : 'text-red-600'} />
+          <StatCard label="Profit Margin" value={margin !== null ? `${margin}%` : '—'} sub="ratio" />
         </div>
 
-        {/* View tabs */}
+        {/* Tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {VIEWS.map(v => (
-            <button key={v.key} onClick={() => setActiveView(v.key)}
+            <button
+              key={v.key}
+              onClick={() => setActiveView(v.key)}
               className={`px-4 py-2 rounded-full border text-sm font-bold transition-all font-nunito ${
                 activeView === v.key
                   ? 'bg-amber-500 border-amber-500 text-white'
                   : 'bg-white border-amber-200 text-amber-600 hover:border-amber-300'
               }`}
-            >{v.label}</button>
+            >
+              {v.label}
+            </button>
           ))}
         </div>
 
-        {/* Overview */}
+        {/* OVERVIEW */}
         {activeView === 'overview' && (
-          <div className="flex gap-5 flex-wrap">
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[460px]">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Revenue vs Expenses by Year</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={profitData} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
-                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#B45309', fontFamily: 'Nunito' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#B45309', fontFamily: 'Nunito' }} tickFormatter={v => `$${v}`} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 12, fontFamily: 'Nunito' }} />
-                  <Bar dataKey="revenue"  name="Revenue"  fill="#16A34A" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#DC2626" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5">
+            <p className="font-fredoka text-base text-amber-900 mb-4">
+              Revenue vs Expenses by Year
+            </p>
 
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[260px]">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Net Profit Trend</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={profitData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
-                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#B45309', fontFamily: 'Nunito' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#B45309', fontFamily: 'Nunito' }} tickFormatter={v => `$${v}`} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Line type="monotone" dataKey="netProfit" name="Net Profit" stroke="#F59E0B"
-                    strokeWidth={3} dot={{ r: 5, fill: '#F59E0B' }} activeDot={{ r: 7 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={profitData} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" />
+                <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                <YAxis tickFormatter={v => `$${v}`} />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar dataKey="revenue" fill="#16A34A" />
+                <Bar dataKey="expenses" fill="#DC2626" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
 
-        {/* Expenses */}
+        {/* EXPENSES */}
         {activeView === 'expenses' && (
-          <div className="flex gap-5 flex-wrap">
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 w-80 shrink-0">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Expenses by Category</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie data={expCat} dataKey="total" nameKey="category" cx="50%" cy="50%" outerRadius={90}
-                    label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {expCat.map((e, i) => <Cell key={i} fill={CAT_COLORS[e.category] || '#999'} />)}
-                  </Pie>
-                  <Tooltip formatter={v => [`$${v}`, 'Total']} contentStyle={{ fontSize: 12, fontFamily: 'Nunito', borderRadius: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5">
+            <p className="font-fredoka text-base text-amber-900 mb-4">
+              Expense Breakdown
+            </p>
 
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[280px]">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Category Details</p>
-              {[...expCat].sort((a, b) => b.total - a.total).map(cat => {
-                const pct   = Math.round((cat.total / totalExp) * 100);
-                const color = CAT_COLORS[cat.category] || '#999';
-                return (
-                  <div key={cat.category} className="mb-5">
-                    <div className="flex justify-between mb-1.5">
-                      <span className="font-bold text-sm text-amber-900 font-nunito">{cat.category}</span>
-                      <span className="font-bold text-sm font-nunito" style={{ color }}>${cat.total.toLocaleString()} ({pct}%)</span>
-                    </div>
-                    <div className="h-2 bg-amber-100 rounded-full">
-                      <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={expCat} dataKey="total" nameKey="category" outerRadius={90}>
+                  {expCat.map((e, i) => (
+                    <Cell key={i} fill={CAT_COLORS[e.category] || '#999'} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={v => `$${v}`} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         )}
 
-        {/* Revenue */}
+        {/* REVENUE */}
         {activeView === 'revenue' && (
           <div className="flex gap-5 flex-wrap">
+
+            {/* BAR CHART */}
             <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 flex-1 min-w-[460px]">
-              <p className="font-fredoka text-base text-amber-900 mb-4">Revenue by Product</p>
+              <p className="font-fredoka text-base text-amber-900 mb-4">
+                Revenue by Product
+              </p>
+
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={revItems} layout="vertical" barSize={20}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FDE68A" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: '#B45309' }} tickFormatter={v => `$${v}`} />
-                  <YAxis type="category" dataKey="item" tick={{ fontSize: 11, fill: '#B45309', fontFamily: 'Nunito' }} width={130} />
-                  <Tooltip formatter={v => [`$${v}`, 'Revenue']} contentStyle={{ fontSize: 12, fontFamily: 'Nunito', borderRadius: 12 }} />
-                  <Bar dataKey="total" radius={[0, 4, 4, 0]}>
-                    {revItems.map((_, i) => <Cell key={i} fill={ITEM_COLORS[i % ITEM_COLORS.length]} />)}
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" tickFormatter={v => `$${v}`} />
+                  <YAxis type="category" dataKey="item" width={130} />
+                  <Tooltip formatter={v => `$${v}`} />
+                  <Bar dataKey="total">
+                    {revItems.map((_, i) => (
+                      <Cell key={i} fill={ITEM_COLORS[i % ITEM_COLORS.length]} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 w-56 shrink-0">
-              <p className="font-fredoka text-base text-amber-900 mb-3">Product Ranking</p>
-              {revItems.map((item, i) => (
+            {/* RANKING LIST */}
+            <div className="bg-white border border-amber-200 rounded-2xl shadow-sm p-5 w-56">
+
+              {/* HEADER + TOGGLE */}
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-fredoka text-base text-amber-900">Product Ranking</p>
+
+                {/* UP/DOWN TOGGLE BUTTON*/}
+                <button
+                  onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                  className="flex flex-col items-center justify-center w-6 h-6 border border-amber-200 rounded hover:bg-amber-50 transition"
+                  title={sortOrder === 'desc' ? 'Highest → Lowest' : 'Lowest → Highest'}
+                >
+                  {/* up triangle */}
+                  <div
+                    className={`w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-amber-700 ${
+                      sortOrder === 'asc' ? 'opacity-100' : 'opacity-30'
+                    }`}
+                  />
+                  {/* down triangle */}
+                  <div
+                    className={`w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-amber-700 ${
+                      sortOrder === 'desc' ? 'opacity-100' : 'opacity-30'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* LIST */}
+              {sortedRevItems.map((item, i) => (
                 <div key={item.item} className="flex items-center gap-3 mb-3">
-                  <span className="font-fredoka text-base min-w-[24px]" style={{ color: ITEM_COLORS[i % ITEM_COLORS.length] }}>#{i + 1}</span>
+                  <span
+                    className="font-fredoka text-base min-w-[24px]"
+                    style={{ color: ITEM_COLORS[i % ITEM_COLORS.length] }}
+                  >
+                    #{i + 1}
+                  </span>
                   <div>
-                    <p className="text-xs font-bold text-amber-900 font-nunito">{item.item}</p>
-                    <p className="text-[11px] text-amber-400 font-nunito">${item.total.toLocaleString()}</p>
+                    <p className="text-xs font-bold text-amber-900 font-nunito">
+                      {item.item}
+                    </p>
+                    <p className="text-[11px] text-amber-400 font-nunito">
+                      ${item.total.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
+
           </div>
         )}
+
       </div>
     </div>
   );
