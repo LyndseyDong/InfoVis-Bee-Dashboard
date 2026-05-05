@@ -6,7 +6,6 @@ const NAV_LINKS = [
   { to: '/finance',  label: '💰 Finance',  exact: false },
   { to: '/compare',  label: '📊 Compare',  exact: false },
   { to: '/calendar',  label: '📅 Calendar', exact: false },
-  { to: '/timeline',  label: '📈 Timeline', exact: false },
   { to: '/upload',    label: '📤 Upload',   exact: false },
 ];
 
