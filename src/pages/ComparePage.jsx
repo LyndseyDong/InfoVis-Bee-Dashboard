@@ -5,11 +5,11 @@ import { HIVE_IDS, getCompareDataByQuarter, getCompareDataByYear, getTotalHarves
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 const HIVE_COLORS = {
-  Hive1: '#F59E0B',
-  Hive2: '#16A34A',
-  Hive3: '#2563EB',
-  Hive4: '#9333EA',
-  Hive5: '#DC2626',
+  Hive1: '#e41a1c',
+  Hive2: '#377eb8',
+  Hive3: '#4daf4a',
+  Hive4: '#984ea3',
+  Hive5: '#ff7f00',
 };
 
 const METRICS = [
