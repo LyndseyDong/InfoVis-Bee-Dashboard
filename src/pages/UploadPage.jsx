@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import Navbar from '../components/Navbar';
+import { useApp } from '../context/AppContext';
 
 const DATA_TYPES = [
   {
@@ -70,6 +71,7 @@ const DATA_TYPES = [
 ];
 
 export default function UploadPage() {
+  const { refreshData } = useApp();
   const [selectedType, setSelectedType] = useState(DATA_TYPES[0]);
   const [rows, setRows]     = useState([]);
   const [fileName, setFileName] = useState('');
@@ -144,6 +146,7 @@ export default function UploadPage() {
         setRows([]);
         setFileName('');
         if (fileRef.current) fileRef.current.value = '';
+        await refreshData();
       } else {
         setStatus('error');
         setStatusMsg(data.error || 'Upload failed.');

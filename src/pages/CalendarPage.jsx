@@ -84,9 +84,6 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="mb-7">
           <h2 className="font-fredoka text-2xl text-amber-900">📅 Treatment & Vaccine Calendar</h2>
-          <p className="text-amber-400 text-sm mt-0.5 font-nunito">
-            Treatments (●) · Vaccines (■) · Mite alerts (◆) · Due dates (○)
-          </p>
         </div>
 
         <div className="flex gap-6 flex-wrap items-start">
@@ -157,12 +154,11 @@ export default function CalendarPage() {
                             {day}
                           </span>
 
-                          {/* Treatment dots — circles */}
+                          {/* Treatment dots — amber filled circles */}
                           {treats.length > 0 && (
                             <div className="flex flex-wrap gap-0.5 mt-0.5">
                               {treats.slice(0, 4).map((e, i) => (
-                                <div key={i} className="w-2 h-2 rounded-full shadow-sm flex-shrink-0"
-                                  style={{ background: HIVE_COLORS[e.hiveId] || '#999' }}
+                                <div key={i} className="w-2 h-2 rounded-full shadow-sm flex-shrink-0 bg-amber-400"
                                   title={`💊 ${e.hiveId}: ${e.treatment}`}
                                 />
                               ))}
@@ -170,12 +166,11 @@ export default function CalendarPage() {
                             </div>
                           )}
 
-                          {/* Vaccine dots — squares */}
+                          {/* Vaccine dots — purple filled squares */}
                           {vaccines.length > 0 && (
                             <div className="flex flex-wrap gap-0.5 mt-0.5">
                               {vaccines.slice(0, 4).map((e, i) => (
-                                <div key={i} className="w-2 h-2 rounded-sm shadow-sm flex-shrink-0"
-                                  style={{ background: HIVE_COLORS[e.hiveId] || '#999' }}
+                                <div key={i} className="w-2 h-2 rounded-none shadow-sm flex-shrink-0 bg-purple-500"
                                   title={`💉 ${e.hiveId}: ${e.vaccine}`}
                                 />
                               ))}
@@ -183,12 +178,11 @@ export default function CalendarPage() {
                             </div>
                           )}
 
-                          {/* Treatment due dots — outlined circles */}
+                          {/* Treatment due dots — blue outlined circles */}
                           {dues.length > 0 && (
                             <div className="flex flex-wrap gap-0.5 mt-0.5">
                               {dues.slice(0, 4).map((e, i) => (
-                                <div key={i} className="w-2 h-2 rounded-full flex-shrink-0 border-2"
-                                  style={{ borderColor: HIVE_COLORS[e.hiveId] || '#999' }}
+                                <div key={i} className="w-2 h-2 rounded-full flex-shrink-0 border-2 border-blue-400"
                                   title={`🔔 ${e.hiveId} treatment due`}
                                 />
                               ))}
@@ -216,7 +210,7 @@ export default function CalendarPage() {
                     <div className="flex flex-col gap-2 mb-3">
                       {tip.alerts.map((e, i) => (
                         <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl bg-red-50 border border-red-100">
-                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: HIVE_COLORS[e.hiveId] || '#999' }} />
+                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-red-500" />
                           <div>
                             <p className="font-bold text-sm text-red-800 font-nunito">{e.hiveId}</p>
                             <p className="text-xs text-red-400 font-nunito">Mite count: {e.miteCount} — above threshold</p>
@@ -233,7 +227,7 @@ export default function CalendarPage() {
                     <div className="flex flex-col gap-2 mb-3">
                       {tip.dues.map((e, i) => (
                         <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl bg-blue-50 border border-blue-100">
-                          <div className="w-2.5 h-2.5 rounded-full border-2 flex-shrink-0" style={{ borderColor: HIVE_COLORS[e.hiveId] || '#999' }} />
+                          <div className="w-2.5 h-2.5 rounded-full border-2 border-blue-400 flex-shrink-0" />
                           <div>
                             <p className="font-bold text-sm text-blue-800 font-nunito">{e.hiveId}</p>
                             <p className="text-xs text-blue-400 font-nunito">Last: {e.lastTreatment} on {e.lastDate}</p>
@@ -249,9 +243,8 @@ export default function CalendarPage() {
                     <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wide font-nunito mb-1.5">💊 Treatments</p>
                     <div className="flex flex-col gap-2 mb-3">
                       {tip.treats.map((e, i) => (
-                        <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl"
-                          style={{ background: (HIVE_COLORS[e.hiveId] || '#999') + '12' }}>
-                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: HIVE_COLORS[e.hiveId] || '#999' }} />
+                        <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl bg-amber-50 border border-amber-100">
+                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-amber-400" />
                           <div>
                             <p className="font-bold text-sm text-amber-900 font-nunito">{e.hiveId}</p>
                             <p className="text-xs text-amber-500 font-nunito">{e.treatment}</p>
@@ -264,15 +257,14 @@ export default function CalendarPage() {
 
                 {tip.vaccines.length > 0 && (
                   <>
-                    <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wide font-nunito mb-1.5">💉 Vaccines</p>
+                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wide font-nunito mb-1.5">💉 Vaccines</p>
                     <div className="flex flex-col gap-2">
                       {tip.vaccines.map((e, i) => (
-                        <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl"
-                          style={{ background: (HIVE_COLORS[e.hiveId] || '#999') + '12' }}>
-                          <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: HIVE_COLORS[e.hiveId] || '#999' }} />
+                        <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl bg-purple-50 border border-purple-100">
+                          <div className="w-2.5 h-2.5 rounded-none flex-shrink-0 bg-purple-500" />
                           <div>
-                            <p className="font-bold text-sm text-amber-900 font-nunito">{e.hiveId}</p>
-                            <p className="text-xs text-amber-500 font-nunito">{e.vaccine}</p>
+                            <p className="font-bold text-sm text-purple-900 font-nunito">{e.hiveId}</p>
+                            <p className="text-xs text-purple-400 font-nunito">{e.vaccine}</p>
                           </div>
                         </div>
                       ))}
@@ -297,10 +289,10 @@ export default function CalendarPage() {
               ))}
               <div className="mt-3 pt-3 border-t border-amber-100 flex flex-col gap-1.5">
                 {[
-                  { shape: 'rounded-full w-2.5 h-2.5 bg-amber-400',              label: 'Treatment' },
-                  { shape: 'rounded-sm w-2.5 h-2.5 bg-purple-400',               label: 'Vaccine' },
-                  { shape: 'rounded-full w-2.5 h-2.5 border-2 border-blue-400',  label: 'Due date' },
-                  { shape: 'rounded-full w-2.5 h-2.5 bg-red-500',                label: 'Mite alert' },
+                  { shape: 'rounded-full w-2.5 h-2.5 bg-amber-400',             label: 'Treatment' },
+                  { shape: 'rounded-none w-2.5 h-2.5 bg-purple-500',            label: 'Vaccine' },
+                  { shape: 'rounded-full w-2.5 h-2.5 border-2 border-blue-400', label: 'Due date' },
+                  { shape: 'rounded-full w-2.5 h-2.5 bg-red-500',               label: 'Mite alert' },
                 ].map(({ shape, label }) => (
                   <div key={label} className="flex items-center gap-2">
                     <div className={`flex-shrink-0 ${shape}`} />
@@ -417,7 +409,7 @@ export default function CalendarPage() {
                       return (
                         <div key={`${d}-${i}`} className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: HIVE_COLORS[e.hiveId] || '#999' }} />
+                            <div className="w-2 h-2 rounded-full border-2 border-blue-400 flex-shrink-0" />
                             <span className="text-xs font-bold text-blue-800 font-nunito">{e.hiveId}</span>
                           </div>
                           <span className={`text-[10px] font-bold font-nunito ${isOverdue ? 'text-red-500' : 'text-blue-500'}`}>

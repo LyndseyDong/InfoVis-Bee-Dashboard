@@ -5,8 +5,8 @@ import { HiveHex } from '../components/Hexagon';
 import { useApp } from '../context/AppContext';
 import {
   HIVE_IDS, getHiveHealth, getLatestMiteCount,
-  getMiteData, getWeightData, getHarvestData,
   getMiteDataByYear, getWeightDataByYear, getHarvestDataByYear,
+  getMiteDataByQuarter, getWeightDataByQuarter, getHarvestDataByQuarter,
   getTotalHarvest, getHiveEvents, getTreatments,
 } from '../data/dataHelpers';
 import {
@@ -179,9 +179,9 @@ export default function HivePage() {
   const treatments   = getTreatments(id, selectedYear);
   const hive         = { id, health, latestMite: latest?.miteCount ?? '—' };
 
-  const miteData    = selectedYear === 'all' ? getMiteDataByYear(id)    : getMiteData(id, selectedYear);
-  const weightData  = selectedYear === 'all' ? getWeightDataByYear(id)  : getWeightData(id, selectedYear);
-  const harvestData = selectedYear === 'all' ? getHarvestDataByYear(id) : getHarvestData(id, selectedYear);
+  const miteData    = selectedYear === 'all' ? getMiteDataByYear(id)    : getMiteDataByQuarter(id, selectedYear);
+  const weightData  = selectedYear === 'all' ? getWeightDataByYear(id)  : getWeightDataByQuarter(id, selectedYear);
+  const harvestData = selectedYear === 'all' ? getHarvestDataByYear(id) : getHarvestDataByQuarter(id, selectedYear);
 
   const treatmentsByType = {};
   treatments.forEach(t => {

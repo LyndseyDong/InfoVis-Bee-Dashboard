@@ -137,8 +137,8 @@ export default function HealthOverview() {
   // refreshKey in dep list forces re-read of helpers after data refresh
   const hives = HIVE_IDS.map(id => ({
     id,
-    health:     getHiveHealth(id),
-    latestMite: getLatestMiteCount(id)?.miteCount ?? '—',
+    health:     getHiveHealth(id, selectedYear),
+    latestMite: getLatestMiteCount(id, selectedYear)?.miteCount ?? '—',
     harvest:    getTotalHarvest(id, selectedYear),
   }));
 

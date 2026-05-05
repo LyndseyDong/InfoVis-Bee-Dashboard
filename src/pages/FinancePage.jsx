@@ -57,7 +57,8 @@ const VIEWS = [
 ];
 
 export default function FinancePage() {
-  const { selectedYear } = useApp();
+  const { selectedYear, refreshKey } = useApp();
+  void refreshKey;
   const [activeView, setActiveView] = useState('overview');
 
   // sort state for ranking list only

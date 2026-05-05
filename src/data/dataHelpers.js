@@ -13,9 +13,9 @@ function getMiteThreshold(beeSample) {
   return beeSample === 'Cup' ? 9 : 4.5;
 }
 
-export function getHiveHealth(hiveId) {
+export function getHiveHealth(hiveId, year = 'all') {
   const readings = rawData.miteCount
-    .filter(r => r.hiveId === hiveId)
+    .filter(r => r.hiveId === hiveId && (year === 'all' || r.date.startsWith(year)))
     .sort((a, b) => b.date.localeCompare(a.date));
   if (!readings.length) return 'good';
   const latest = readings[0];
@@ -25,9 +25,9 @@ export function getHiveHealth(hiveId) {
   return 'good';
 }
 
-export function getLatestMiteCount(hiveId) {
+export function getLatestMiteCount(hiveId, year = 'all') {
   return rawData.miteCount
-    .filter(r => r.hiveId === hiveId)
+    .filter(r => r.hiveId === hiveId && (year === 'all' || r.date.startsWith(year)))
     .sort((a, b) => b.date.localeCompare(a.date))[0] || null;
 }
 
@@ -87,6 +87,58 @@ export function getHarvestDataByYear(hiveId) {
   return Object.keys(byYear).sort().map(y => ({
     date: y,
     value: Math.round(byYear[y]),
+  }));
+}
+
+function toQuarterKey(yyyyMM) {
+  const m = yyyyMM.split('-')[1];
+  return `Q${Math.ceil(parseInt(m, 10) / 3)}`;
+}
+
+export function getMiteDataByQuarter(hiveId, year) {
+  const byQ = {};
+  rawData.miteCount
+    .filter(r => r.hiveId === hiveId && r.date.startsWith(year))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(r => {
+      const q = toQuarterKey(r.date.slice(0, 7));
+      if (!byQ[q]) byQ[q] = [];
+      byQ[q].push(r.miteCount);
+    });
+  return ['Q1','Q2','Q3','Q4'].map(q => ({
+    date: q,
+    value: byQ[q] ? Math.round((byQ[q].reduce((s, v) => s + v, 0) / byQ[q].length) * 10) / 10 : null,
+  }));
+}
+
+export function getWeightDataByQuarter(hiveId, year) {
+  const byQ = {};
+  rawData.hiveWeight
+    .filter(r => r.hiveId === hiveId && r.date.startsWith(year))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(r => {
+      const q = toQuarterKey(r.date.slice(0, 7));
+      if (!byQ[q]) byQ[q] = [];
+      byQ[q].push(r.weight);
+    });
+  return ['Q1','Q2','Q3','Q4'].map(q => ({
+    date: q,
+    value: byQ[q] ? Math.round((byQ[q].reduce((s, v) => s + v, 0) / byQ[q].length) * 10) / 10 : null,
+  }));
+}
+
+export function getHarvestDataByQuarter(hiveId, year) {
+  const byQ = {};
+  rawData.honeyHarvest
+    .filter(r => r.hiveId === hiveId && r.date.startsWith(year))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(r => {
+      const q = toQuarterKey(r.date.slice(0, 7));
+      byQ[q] = (byQ[q] || 0) + r.pounds;
+    });
+  return ['Q1','Q2','Q3','Q4'].map(q => ({
+    date: q,
+    value: byQ[q] ? Math.round(byQ[q]) : null,
   }));
 }
 

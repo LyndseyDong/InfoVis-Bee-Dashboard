@@ -45,8 +45,8 @@ export default function ComparePage() {
 
   const summary = selected.map(id => ({
     id,
-    health:     getHiveHealth(id),
-    latestMite: getLatestMiteCount(id)?.miteCount ?? '—',
+    health:     getHiveHealth(id, selectedYear),
+    latestMite: getLatestMiteCount(id, selectedYear)?.miteCount ?? '—',
     harvest:    getTotalHarvest(id, selectedYear),
   }));
 
