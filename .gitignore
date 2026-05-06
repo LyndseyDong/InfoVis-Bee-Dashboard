@@ -4,3 +4,4 @@ dist/
 server/buzz.db
 server/buzz.db-shm
 server/buzz.db-wal
+server/node_modules
