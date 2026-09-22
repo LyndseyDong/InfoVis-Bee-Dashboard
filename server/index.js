@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { createDb } = require('./db');
 
 const app = express();
@@ -174,5 +175,22 @@ app.delete('/api/honeyHarvest/:id', (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-const PORT = 3001;
-app.listen(PORT, () => console.log(`BuzzTracker API → http://localhost:${PORT}`));
+// Serve the built React frontend in production
+const DIST_PATH = path.join(__dirname, '../dist');
+app.use(express.static(DIST_PATH));
+
+// Unknown API routes should stay API 404s
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'API route not found' });
+});
+
+// React Router fallback
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(DIST_PATH, 'index.html'));
+});
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`BuzzTracker running on port ${PORT}`);
+});
