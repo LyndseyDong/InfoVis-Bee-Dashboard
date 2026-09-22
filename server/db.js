@@ -2,10 +2,12 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const DB_PATH = path.join(__dirname, 'buzz.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'buzz.db');
 const SEED_PATH = path.join(__dirname, '../src/data/realData.json');
 
 function createDb() {
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
 
